@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@emotion/react';
 import { createTheme,Container, Typography, TextField, TableContainer, LinearProgress, Table, TableHead, TableRow, TableCell, TableBody} from '@mui/material';
 import axios from 'axios';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
 import Pagination from '@mui/material/Pagination';
@@ -45,20 +45,38 @@ const Coinstable = () => {
       });
     const fetchCoins = async () => {
         setLoading(true);
-        const { data } = await axios.get("/v3/markets/summaries");
-        console.log(data);
-    
-        setCoins(data);
+        var CryptoJS = require("crypto-js");
+        const API_URL = '/v3/markets/summaries';
+        var content_hash = CryptoJS.SHA512('').toString(CryptoJS.enc.Hex);
+
+        var api_timestamp = new Date().getTime();
+
+        var pre_sign_string = api_timestamp+API_URL+'GET'+content_hash;
+        var signature = CryptoJS.HmacSHA512(pre_sign_string, 'xxxxxxsecretxxxxx').toString(CryptoJS.enc.Hex);
+        const headers = {'Api-Key': 'abcdef12345', 'Api-Timestamp': api_timestamp, 'Api-Content-Hash': content_hash, 'Api-Signature': signature, 'Content-Type': 'application/json'};
+              
+         axios.get(API_URL, {
+          //  headers:headers
+        })
+  .then(response => {
+    // const totalCount = response.headers['x-total-count'];
+    // console.log(`Total number of responses: ${totalCount}`);
+    const {data} = response;
+    console.log(data);
+    setCoins(data);
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+       
         setLoading(false);
       };
       useEffect(() => {
         fetchCoins();
       }, []);
      
-      const handleSearch = () => {
-        console.log("coins");
-        console.log(coins);
-        
+      const handleSearch = () => {     
         return coins.filter(
           (coin) =>
             search == "" || coin.symbol.toLowerCase().includes(search)
@@ -118,8 +136,7 @@ const Coinstable = () => {
                         scope="row"
                         style={{
                             display: "flex",
-                            gap: 15,
-                            
+                            gap: 15, 
                         }}
                     >
                         <div
@@ -192,7 +209,7 @@ const Coinstable = () => {
           classes={{ ul: classes.pagination }}
           onChange={(_, value) => {
             setPage(value);
-            window.scroll(0, 450);
+            window.scroll(0, 100);
           }}
         />
         </Container>

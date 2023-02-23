@@ -2,7 +2,7 @@ import{makeStyles} from 'tss-react/mui'
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
-import Header from './components/Header';
+import Header from './components/Header/Header';
 import CoinPage from './Pages/CoinPage';
 import HomePage from './Pages/HomePage';
 function App() {
